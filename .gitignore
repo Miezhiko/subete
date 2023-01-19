@@ -1,0 +1,11 @@
+.vscode/
+*.opensdf
+*.sdf
+*.suo
+*.filters
+*.user
+*.db3
+*.a
+*.o
+*.exe
+subete
