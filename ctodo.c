@@ -170,12 +170,12 @@ int todo_initdb_meta() {
   ///<Option>
   ///Ending word (--motivate)
   ///</Option>
-  sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (13,'do it')");
+  sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (13,'БЛЯДЬ')");
   ///<Option>
   ///Synchronization directory
   ///</Option>
 #ifndef _WIN32
-  sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (0,'/home/nen/todo')");
+  sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (0,'~/todo')");
 #else
   sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (0,'.')");
 #endif
@@ -886,7 +886,6 @@ char** todo_read_custom(int list, int parcount, char* db) {
 }
 
 int todo_write_meta(char** argv, int argc, int list) {
-  char* ending = (char*)calloc(200, sizeof(char));
   char first = 0;
   int last = 0;
   int argi;
@@ -902,7 +901,6 @@ int todo_write_meta(char** argv, int argc, int list) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    free (ending);
     if (todo_initdb() == 0) {
 #ifdef Console
       printf("Done\n\r");
@@ -913,6 +911,7 @@ int todo_write_meta(char** argv, int argc, int list) {
     }
     return todo_write_meta(argv, argc, list);
   }
+  char* ending = (char*)calloc(200, sizeof(char));
   while (sqlite3_step(stmt) == SQLITE_ROW)
   if (strcmp((const char*)sqlite3_column_text(stmt, 0), "13") == 0) {
     sprintf(ending, "%s", sqlite3_column_text(stmt, 1)); //NOLINT
@@ -956,8 +955,13 @@ int todo_write_meta(char** argv, int argc, int list) {
       strcat(text, " ");        //NOLINT
     }
   }
-  if (useending == 1)
+  if (useending == 1) {
+    unsigned long int t_len = strlen(text);
+    for (int i = 0; i < t_len; ++i) {
+      text[i] = toupper(text[i]);
+    }
     strcat(text, ending); //NOLINT
+  }
   if (first == 1) {
     sql("UPDATE TODO SET id = id + 1000000000");
     sql("UPDATE TODO SET id = id - (1000000000 - 1)");
