@@ -35,7 +35,7 @@ char** queries  = NULL;
 sqlite3* handle = NULL;
 
 char* todo_version() {
-  return "  CTODO v0.0.1\n";
+  return "  CTODO v0.0.2\n";
 }
 
 char* todo_help() {
@@ -711,9 +711,9 @@ char** todo_read_meta(int list, int parcount) {
   char* spaces2;
   int maxl2 = 0, maxl1 = 0;
   int i, maxi1, maxi2;
-  out = (char**)malloc(sizeof(char*)* 100);
+  out = (char**)malloc(sizeof(char*) * 50);
   for (x = 0; x < 100; x++)
-    out[x] = (char*)malloc(sizeof(char)* 255);
+    out[x] = (char*)malloc(sizeof(char) * 512);
 #ifndef _WIN32
   char* colorscheme;
   char* lineborder2;
@@ -802,9 +802,9 @@ char** todo_read_meta(int list, int parcount) {
     }
     return todo_read_meta(list, parcount);
   }
-  lineborder1 = (char*)calloc(255, sizeof(char));
+  lineborder1 = (char*)calloc(512, sizeof(char));
 #ifndef _WIN32
-  lineborder2 = (char*)calloc(255, sizeof(char));
+  lineborder2 = (char*)calloc(512, sizeof(char));
 #endif
   spaces1 = (char*)calloc(200, sizeof(char));
   spaces2 = (char*)calloc(200, sizeof(char));
@@ -891,7 +891,7 @@ int todo_write_meta(char** argv, int argc, int list) {
   int argi;
   char* text;
   int useending = 0;
-  int limit = 200;
+  unsigned int limit = 150;
   ///<Summary>
   ///Getting options from local database
   ///<Summary>
@@ -940,12 +940,17 @@ int todo_write_meta(char** argv, int argc, int list) {
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
     last = atoi((const char*)sqlite3_column_text(stmt, 0));
-  text = (char*)calloc(200, sizeof(char));
+  text = (char*)calloc(limit + 1, sizeof(char));
   if (useending == 1)
-    limit = 200 - strlen(ending);
+    limit = limit - strlen(ending);
   for (argi = 1; argi < argc; argi++) {
-    if (strlen(text) + strlen(argv[argi]) + sizeof(char) >= (unsigned int)limit)
+    if (strlen(text) + strlen(argv[argi]) > limit) {
+#ifdef Console
+      printf("Part of message is out of limit: %d\n\r", limit);
+#endif
+      strcat(text, " ");        //NOLINT
       break;
+    }
     else if ((strcmp(argv[argi], "--motivate") == 0))
       useending = 1;
     else if ((strcmp(argv[argi], "--first") == 0) || (strcmp(argv[argi], "-1") == 0))
