@@ -10,15 +10,20 @@ DESTDIR   ?=
 
 all: subete
 
-rebuild: clean | all
+rebuild: clean all
 
-subete: $(CSRC) | ctodo
-	$(CC) ${INCLUDES} -o subete $^ ${CFLAGS} ${LIBS}
+subete: $(CSRC) $(LIBS)
+    $(CC) ${INCLUDES} -o subete $^ ${CFLAGS}
 
-ctodo: $(CLIBS)
-	$(CC) ${INCLUDES} -c -o ${LIBS} $^ $(CFLAGS)
+$(LIBS): $(CLIBS)
+    $(CC) ${INCLUDES} -c -o $@ $^ $(CFLAGS)
 
-.PHONY: clean all rebuild inheritsqlite
+install: subete
+    $(MKDIR) $(DESTDIR)$(BINDIR)
+    $(INSTALL) subete $(DESTDIR)$(BINDIR)
+
+uninstall:
+    rm -f $(DESTDIR)$(BINDIR)/subete
 
 clean:
 	@echo "Cleaning binaries..."
@@ -28,7 +33,3 @@ clean:
 	find . -name '*~' -delete;
 	find . -name '#*#' -delete;
 	@echo "Cleaning complete."
-
-install:
-	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) subete$(EXE) $(DESTDIR)$(BINDIR)/
