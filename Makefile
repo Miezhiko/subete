@@ -13,17 +13,14 @@ all: subete
 rebuild: clean all
 
 subete: $(CSRC) $(LIBS)
-    $(CC) ${INCLUDES} -o subete $^ ${CFLAGS}
+        $(CC) ${INCLUDES} -o subete $^ ${CFLAGS}
 
 $(LIBS): $(CLIBS)
-    $(CC) ${INCLUDES} -c -o $@ $^ $(CFLAGS)
+         $(CC) ${INCLUDES} -c -o $@ $^ $(CFLAGS)
 
 install: subete
-    $(MKDIR) $(DESTDIR)$(BINDIR)
-    $(INSTALL) subete $(DESTDIR)$(BINDIR)
-
-uninstall:
-    rm -f $(DESTDIR)$(BINDIR)/subete
+         $(MKDIR) $(DESTDIR)$(BINDIR)
+         $(INSTALL) subete $(DESTDIR)$(BINDIR)
 
 clean:
 	@echo "Cleaning binaries..."
