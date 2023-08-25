@@ -3,6 +3,7 @@
 #endif
 
 #include "ctodo.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,11 +12,11 @@ char* dest_help = NULL;
 char* db        = NULL;
 
 char* subete_version() {
-  return "  subete v0.0.1\n";
+  return "  subete v0.0.2\n";
 }
 
 char* subete_help() {
-  dest_help = (char*)calloc(4000, sizeof(char));
+  dest_help = calloc(4000, sizeof(char));
   strcpy(dest_help, subete_version()); // NOLINT
   strcat(dest_help,                    // NOLINT
 "  * usage:\n\
@@ -115,10 +116,9 @@ int ctodo_read_custom(int list, char* db) {
 }
 
 char dbcheck(int argc, char* argv[]) {
-  int argi = 0;
-  for (argi = 1; argi < (argc - 1); argi++) {
+  for (int argi = 1; argi < (argc - 1); argi++) {
     if ((strcmp(argv[argi], "--db") == 0)) {
-      db = (char*)calloc(200, sizeof(char));
+      db = calloc(200, sizeof(char));
       sprintf(db, "%s", argv[argi + 1]); // NOLINT
       return 1;
     }
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
         printf("you need to specify db file alike --db mydb.db3\n\r");
         return_value = -1;
       } else {
-        db = (char*)calloc(200, sizeof(char));
+        db = calloc(200, sizeof(char));
         sprintf(db, "%s", argv[2]); // NOLINT
         if (argc < 4) return_value = ctodo_read_custom(-1, db);
         else {
@@ -226,7 +226,7 @@ int main(int argc, char* argv[]) {
           argv[argi + 1] = "";
         }
         if ((strcmp(argv[argi], "--db") == 0)) {
-          db = (char*)calloc(200, sizeof(char));
+          db = calloc(200, sizeof(char));
           sprintf(db, "%s", argv[argi + 1]); // NOLINT
           argv[argi] = "";
           argv[argi + 1] = "";

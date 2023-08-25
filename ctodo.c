@@ -1,10 +1,6 @@
 #define Console
 
-#ifdef _MSC_VER
-#include "sqlite3.h"
-#else
 #include <sqlite3.h>
-#endif
 
 #include <stdio.h>
 #include <time.h>
@@ -23,23 +19,23 @@ time_t timefile;
 sqlite3_stmt* stmt = NULL;
 
 ///Maximum sqlite query
-int q_size = 150;
+const int q_size = 150;
 #ifdef WIN
-int q_cnt = 26;
+const int q_cnt = 26;
 #else
 char* home = NULL;
-int q_cnt = 30;
+const int q_cnt = 30;
 #endif
 
 char** queries  = NULL;
 sqlite3* handle = NULL;
 
 char* todo_version() {
-  return "  CTODO v0.0.2\n";
+  return "  CTODO v0.0.3\n";
 }
 
 char* todo_help() {
-  dest = (char*)calloc(4000, sizeof(char));
+  dest = calloc(4000, sizeof(char));
   strcpy(dest, todo_version()); // NOLINT
   strcat(dest,                  // NOLINT
 "     todo list management lib\n");
@@ -48,7 +44,7 @@ char* todo_help() {
 
 void shitHappended() {
   #ifdef Console
-  printf("Shit happened\n\r");
+  printf("Shit happened\n");
   #endif
 }
 
@@ -57,7 +53,7 @@ void timeUpdate(time_t t) {
   retval = sqlite3_exec(handle, queries[ind - 1], 0, 0, 0);
   if (retval) {
 #ifdef Console
-    printf("Failed to update db time\n\r");
+    printf("Failed to update db time\n");
 #endif
     return;
   }
@@ -77,16 +73,15 @@ char* rtrim(char* str) {
   return str;
 }
 
-///TODO: clean allocated space
 int prelude() {
   timefile = 0;
   f = NULL;
 #ifndef _WIN32
-  char* temp = (char*)calloc(200, sizeof(char));
+  char* temp = calloc(200, sizeof(char));
 #endif
-  queries = (char**)malloc(sizeof(char*)* q_cnt);
+  queries = malloc(sizeof(char*)* q_cnt);
   for (x = 0; x < q_cnt; x++)
-    queries[x] = (char*)malloc(sizeof(char)* q_size);
+    queries[x] = malloc(sizeof(char)* q_size);
 #ifdef _WIN32
   retval = sqlite3_open("todo.db3", &handle);
 #else
@@ -107,9 +102,9 @@ int prelude() {
 int prelude_custom(char* db) {
   timefile = 0;
   f = NULL;
-  queries = (char**)malloc(sizeof(char*)* q_cnt);
+  queries = malloc(sizeof(char*)* q_cnt);
   for (x = 0; x < q_cnt; x++)
-    queries[x] = (char*)malloc(sizeof(char)* q_size);
+    queries[x] = malloc(sizeof(char)* q_size);
   retval = sqlite3_open(db, &handle);
   if (retval) {
 #ifdef Console
@@ -280,8 +275,8 @@ int todo_set_custom(char** argv, int argc, char* db) {
 }
 
 int todo_show_meta(char** argv, int argc) {
-  char* opt = (char*)calloc(3, sizeof(char));
-  char* answer = (char*)calloc(200, sizeof(char));
+  char* opt = calloc(3, sizeof(char));
+  char* answer = calloc(200, sizeof(char));
   if (argc < 3) {
 #ifdef Console
     printf("show what?\n\r");
@@ -316,7 +311,7 @@ int todo_show_custom(char** argv, int argc, char* db) {
 
 int todo_history_meta() {
   char* syncdir;
-  char* cmd = (char*)calloc(200, sizeof(char));
+  char* cmd = calloc(200, sizeof(char));
   int git = 0, hg = 0, svn = 0;
   sprintf(queries[ind++], "SELECT option, text FROM OPTIONS"); //NOLINT
   retval = sqlite3_prepare_v2(handle, queries[ind - 1], -1, &stmt, 0);
@@ -335,7 +330,7 @@ int todo_history_meta() {
     }
     return todo_history_meta();
   }
-  syncdir = (char*)calloc(200, sizeof(char));
+  syncdir = calloc(200, sizeof(char));
   while (sqlite3_step(stmt) == SQLITE_ROW)
   if (strcmp((const char*)sqlite3_column_text(stmt, 0), "0") == 0)
     sprintf(syncdir, "%s", sqlite3_column_text(stmt, 1)); //NOLINT
@@ -384,16 +379,16 @@ int todo_sync_meta(char** argv) {
   char write = 1;
   char* token1;
   char* token2;
-  char* search = "|";
+  const char* search = "|";
   char* syncdir;
-  char* cmd = (char*)calloc(200, sizeof(char));
+  char* cmd = calloc(200, sizeof(char));
 #ifdef _WIN32
   char* context = NULL;
 #else
-  home = (char*)calloc(200, sizeof(char));
+  home = calloc(200, sizeof(char));
 #endif
-  filename = (char*)calloc(200, sizeof(char));
-  syncdir = (char*)calloc(200, sizeof(char));
+  filename = calloc(200, sizeof(char));
+  syncdir = calloc(200, sizeof(char));
   sprintf(queries[ind++], "SELECT option, text FROM OPTIONS"); //NOLINT
   retval = sqlite3_prepare_v2(handle, queries[ind - 1], -1, &stmt, 0);
   if (retval) {
@@ -591,9 +586,8 @@ int todo_sync_custom(char** argv, char* db) {
 }
 
 void todo_edit_meta(char** argv, int argc) {
-  int argi;
-  char* text = (char*)calloc(200, sizeof(char));
-  for (argi = 3; argi < argc; argi++) {
+  char* text = calloc(200, sizeof(char));
+  for (int argi = 3; argi < argc; argi++) {
     strcat(text, argv[argi]); //NOLINT
     strcat(text, " ");        //NOLINT
   }
@@ -711,9 +705,9 @@ char** todo_read_meta(int list, int parcount) {
   char* spaces2;
   int maxl2 = 0, maxl1 = 0;
   int i, maxi1, maxi2;
-  out = (char**)malloc(sizeof(char*) * 50);
+  out = malloc(sizeof(char*) * 50);
   for (x = 0; x < 100; x++)
-    out[x] = (char*)malloc(sizeof(char) * 512);
+    out[x] = malloc(sizeof(char) * 512);
 #ifndef _WIN32
   char* colorscheme;
   char* lineborder2;
@@ -729,7 +723,7 @@ char** todo_read_meta(int list, int parcount) {
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
   if (strcmp((const char*)sqlite3_column_text(stmt, 0), "21") == 0) {
-    colorscheme = (char*)calloc(50, sizeof(char));
+    colorscheme = calloc(50, sizeof(char));
     if (strcmp((const char*)sqlite3_column_text(stmt, 1), "black") == 0)
       sprintf(colorscheme, "%c[%d;%d;%dm", 0x1B, 1, 6, 66);     //NOLINT
     else if (strcmp((const char*)sqlite3_column_text(stmt, 1), "blink") == 0)
@@ -802,12 +796,12 @@ char** todo_read_meta(int list, int parcount) {
     }
     return todo_read_meta(list, parcount);
   }
-  lineborder1 = (char*)calloc(512, sizeof(char));
+  lineborder1 = calloc(512, sizeof(char));
 #ifndef _WIN32
-  lineborder2 = (char*)calloc(512, sizeof(char));
+  lineborder2 = calloc(512, sizeof(char));
 #endif
-  spaces1 = (char*)calloc(200, sizeof(char));
-  spaces2 = (char*)calloc(200, sizeof(char));
+  spaces1 = calloc(200, sizeof(char));
+  spaces2 = calloc(200, sizeof(char));
   for (i = 0; i < ((maxl2 + maxl1) + 5); i++)
   if (i == 2 + maxl1) {
 #ifdef _WIN32
@@ -911,7 +905,7 @@ int todo_write_meta(char** argv, int argc, int list) {
     }
     return todo_write_meta(argv, argc, list);
   }
-  char* ending = (char*)calloc(200, sizeof(char));
+  char* ending = calloc(200, sizeof(char));
   while (sqlite3_step(stmt) == SQLITE_ROW)
   if (strcmp((const char*)sqlite3_column_text(stmt, 0), "13") == 0) {
     sprintf(ending, "%s", sqlite3_column_text(stmt, 1)); //NOLINT
@@ -940,7 +934,7 @@ int todo_write_meta(char** argv, int argc, int list) {
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
     last = atoi((const char*)sqlite3_column_text(stmt, 0));
-  text = (char*)calloc(limit + 1, sizeof(char));
+  text = calloc(limit + 1, sizeof(char));
   if (useending == 1)
     limit = limit - strlen(ending);
   for (argi = 1; argi < argc; argi++) {
