@@ -31,7 +31,7 @@ char** queries  = NULL;
 sqlite3* handle = NULL;
 
 char* todo_version() {
-  return "  CTODO v0.0.3\n";
+  return "  CTODO v0.0.4\n";
 }
 
 char* todo_help() {
@@ -80,7 +80,7 @@ int prelude() {
   char* temp = calloc(200, sizeof(char));
 #endif
   queries = malloc(sizeof(char*)* q_cnt);
-  for (x = 0; x < q_cnt; x++)
+  for (x = 0; x < q_cnt; ++x)
     queries[x] = malloc(sizeof(char)* q_size);
 #ifdef _WIN32
   retval = sqlite3_open("todo.db3", &handle);
@@ -103,7 +103,7 @@ int prelude_custom(char* db) {
   timefile = 0;
   f = NULL;
   queries = malloc(sizeof(char*)* q_cnt);
-  for (x = 0; x < q_cnt; x++)
+  for (x = 0; x < q_cnt; ++x)
     queries[x] = malloc(sizeof(char)* q_size);
   retval = sqlite3_open(db, &handle);
   if (retval) {
@@ -587,7 +587,7 @@ int todo_sync_custom(char** argv, char* db) {
 
 void todo_edit_meta(char** argv, int argc) {
   char* text = calloc(200, sizeof(char));
-  for (int argi = 3; argi < argc; argi++) {
+  for (int argi = 3; argi < argc; ++argi) {
     strcat(text, argv[argi]); //NOLINT
     strcat(text, " ");        //NOLINT
   }
@@ -681,22 +681,24 @@ void todo_clean_custom(char* db) {
   if (prelude_custom(db) != -1) todo_clean_meta();
 }
 
-void todo_rm_meta(char** argv) {
+void todo_rm_meta(int argc, char** argv) {
   if (strstr(argv[2], ",") != NULL) {
     sprintf(queries[ind++], "DELETE FROM TODO WHERE id IN (%s)", argv[2]);  //NOLINT
   } else {
-    sprintf(queries[ind++], "DELETE FROM TODO WHERE id = %s", argv[2]);     //NOLINT
+    for (int x = 2; x < argc; ++x) {
+      sprintf(queries[ind++], "DELETE FROM TODO WHERE id = %s", argv[x]);   //NOLINT
+    }
   }
   retval = sqlite3_exec(handle, queries[ind - 1], 0, 0, 0);
   timeUpdate(time(0));
 }
 
-void todo_rm(char** argv) {
-  if (prelude() != -1) todo_rm_meta(argv);
+void todo_rm(int argc, char** argv) {
+  if (prelude() != -1) todo_rm_meta(argc, argv);
 }
 
-void todo_rm_custom(char** argv, char* db) {
-  if (prelude_custom(db) != -1) todo_rm_meta(argv);
+void todo_rm_custom(int argc, char** argv, char* db) {
+  if (prelude_custom(db) != -1) todo_rm_meta(argc, argv);
 }
 
 char** todo_read_meta(int list, int parcount) {
@@ -706,7 +708,7 @@ char** todo_read_meta(int list, int parcount) {
   int maxl2 = 0, maxl1 = 0;
   int i, maxi1, maxi2;
   out = malloc(sizeof(char*) * 50);
-  for (x = 0; x < 100; x++)
+  for (x = 0; x < 100; ++x)
     out[x] = malloc(sizeof(char) * 512);
 #ifndef _WIN32
   char* colorscheme;
@@ -802,7 +804,7 @@ char** todo_read_meta(int list, int parcount) {
 #endif
   spaces1 = calloc(200, sizeof(char));
   spaces2 = calloc(200, sizeof(char));
-  for (i = 0; i < ((maxl2 + maxl1) + 5); i++)
+  for (i = 0; i < ((maxl2 + maxl1) + 5); ++i)
   if (i == 2 + maxl1) {
 #ifdef _WIN32
     strcat(lineborder1, "+"); //NOLINT
@@ -831,9 +833,9 @@ char** todo_read_meta(int list, int parcount) {
     maxi2 = maxl2 - atoi((const char*)sqlite3_column_text(stmt, 2));
     strcpy(spaces1, ""); //NOLINT
     strcpy(spaces2, ""); //NOLINT
-    for (i = 0; i < maxi1; i++)
+    for (i = 0; i < maxi1; ++i)
       strcat(spaces1, " "); //NOLINT
-    for (i = 0; i < maxi2; i++)
+    for (i = 0; i < maxi2; ++i)
       strcat(spaces2, " "); //NOLINT
 #ifdef _WIN32
     sprintf(out[x], "%s %s", //NOLINT
@@ -937,7 +939,7 @@ int todo_write_meta(char** argv, int argc, int list) {
   text = calloc(limit + 1, sizeof(char));
   if (useending == 1)
     limit = limit - strlen(ending);
-  for (argi = 1; argi < argc; argi++) {
+  for (argi = 1; argi < argc; ++argi) {
     if (strlen(text) + strlen(argv[argi]) > limit) {
 #ifdef Console
       printf("Part of message is out of limit: %d\n\r", limit);

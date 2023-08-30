@@ -37,8 +37,8 @@ extern void todo_mv_custom(char** argv, char* db);
 extern void todo_clean();
 extern void todo_clean_custom(char* db);
 
-extern void todo_rm(char** argv);
-extern void todo_rm_custom(char** argv, char* db);
+extern void todo_rm(int argc, char** argv);
+extern void todo_rm_custom(int argc, char** argv, char* db);
 
 extern char** todo_read(int list, int parcount);
 extern char** todo_read_custom(int list, int parcount, char* db);

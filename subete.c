@@ -12,7 +12,7 @@ char* dest_help = NULL;
 char* db        = NULL;
 
 char* subete_version() {
-  return "  subete v0.0.2\n";
+  return "  subete v0.0.3\n";
 }
 
 char* subete_help() {
@@ -32,7 +32,7 @@ char* subete_help() {
       - db <db3path> - use another database file (works for other commands too) \n\
   - --edit or -e <number> <msg> - edit task\n\
   - --mv <number1> <number2> - move task\n\
-  - --rm <number1,number2> - delete tasks\n\
+  - --rm <number1,number2> (or space separated) - delete tasks\n\
   - --clean - clean all tasks\n\
   - --swap or -s <number1> <number2> - swap elements\n\
   - --sync - text synchronization to avoid binaries in vcs\n\
@@ -214,8 +214,8 @@ int main(int argc, char* argv[]) {
     } else if (strcmp(argv[1], "--rm") == 0) {
       if (argc < 3) printf("remove what?\n\r");
       else if (dbcheck(argc, argv) == 0)
-        todo_rm(argv);
-      else todo_rm_custom(argv, db);
+        todo_rm(argc, argv);
+      else todo_rm_custom(argc, argv, db);
     } else {
       int argi, list = 0;
       char custom = 0;
