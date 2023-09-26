@@ -12,7 +12,7 @@ char* dest_help = NULL;
 char* db        = NULL;
 
 char* subete_version() {
-  return "  subete v0.0.3\n";
+  return "  subete v0.0.4\n";
 }
 
 char* subete_help() {
@@ -33,7 +33,7 @@ char* subete_help() {
   - --edit or -e <number> <msg> - edit task\n\
   - --mv <number1> <number2> - move task\n\
   - --rm <number1,number2> (or space separated) - delete tasks\n\
-  - --clean - clean all tasks\n\
+  - --clean / --clear - remove all tasks\n\
   - --swap or -s <number1> <number2> - swap elements\n\
   - --sync - text synchronization to avoid binaries in vcs\n\
   - --history - read sync repository todo history \n\
@@ -202,7 +202,8 @@ int main(int argc, char* argv[]) {
       else if (dbcheck(argc, argv) == 0)
         todo_mv(argv);
       else todo_mv_custom(argv, db);
-    } else if (strcmp(argv[1], "--clean") == 0 && argc == 2) {
+    } else if ((strcmp(argv[1], "--clean") == 0
+             || strcmp(argv[1], "--clear") == 0) && argc == 2) {
       char answer;
       printf("Are you sure that you want to clean all the tasks? (y/n) ");
       if (scanf("%c", &answer) > 0) // NOLINT
@@ -216,6 +217,11 @@ int main(int argc, char* argv[]) {
       else if (dbcheck(argc, argv) == 0)
         todo_rm(argc, argv);
       else todo_rm_custom(argc, argv, db);
+    } if (strncmp(argv[1], "--", 2) == 0) {
+      printf("There is no such command\n\n");
+      printf("%s", subete_help());
+      if (dest_help) free(dest_help);
+      printf("%s", todo_help());
     } else {
       int argi, list = 0;
       char custom = 0;
