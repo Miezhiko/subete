@@ -12,7 +12,7 @@ char* dest_help = NULL;
 char* db        = NULL;
 
 char* subete_version() {
-  return "  subete v0.0.4\n";
+  return "  subete v0.0.5\n";
 }
 
 char* subete_help() {
@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
       else if (dbcheck(argc, argv) == 0)
         todo_rm(argc, argv);
       else todo_rm_custom(argc, argv, db);
-    } if (strncmp(argv[1], "--", 2) == 0) {
+    } else if (strncmp(argv[1], "--", 2) == 0) {
       printf("There is no such command\n\n");
       printf("%s", subete_help());
       if (dest_help) free(dest_help);
