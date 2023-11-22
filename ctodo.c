@@ -20,18 +20,14 @@ sqlite3_stmt* stmt = NULL;
 
 ///Maximum sqlite query
 const int q_size = 150;
-#ifdef WIN
-const int q_cnt = 26;
-#else
 char* home = NULL;
 const int q_cnt = 30;
-#endif
 
 char** queries  = NULL;
 sqlite3* handle = NULL;
 
 char* todo_version() {
-  return "  CTODO v0.0.4\n";
+  return "  CTODO v0.0.5\n";
 }
 
 char* todo_help() {
@@ -76,20 +72,14 @@ char* rtrim(char* str) {
 int prelude() {
   timefile = 0;
   f = NULL;
-#ifndef _WIN32
   char* temp = calloc(200, sizeof(char));
-#endif
   queries = malloc(sizeof(char*)* q_cnt);
   for (x = 0; x < q_cnt; ++x)
     queries[x] = malloc(sizeof(char)* q_size);
-#ifdef _WIN32
-  retval = sqlite3_open("todo.db3", &handle);
-#else
   home = (char*)getenv("HOME");
   strcpy(temp, home); // NOLINT
   retval = sqlite3_open(strcat(temp, "/.todo.db3"), &handle); // NOLINT
   free(temp);
-#endif
   if (retval) {
 #ifdef Console
     printf("Database connection failed\n\r");
@@ -169,12 +159,7 @@ int todo_initdb_meta() {
   ///<Option>
   ///Synchronization directory
   ///</Option>
-#ifndef _WIN32
   sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (0,'~/todo')");
-#else
-  sql("INSERT OR REPLACE INTO OPTIONS (option,text) VALUES (0,'.')");
-#endif
-#ifndef _WIN32
   ///<Option>
   ///Path for HOME (only for linux)
   ///</Option>
@@ -190,7 +175,6 @@ int todo_initdb_meta() {
 #endif
     return -1;
   }
-#endif
   return 0;
 }
 
@@ -236,7 +220,6 @@ int todo_set_meta(char** argv, int argc) {
 #endif
     }
   }
-#ifndef _WIN32
   else if (strcmp(argv[2], "home") == 0) {
     sprintf(queries[ind++], "UPDATE OPTIONS SET text='%s' WHERE option = 20", argv[3]); // NOLINT
     retval = sqlite3_exec(handle, queries[ind - 1], 0, 0, 0);
@@ -245,9 +228,8 @@ int todo_set_meta(char** argv, int argc) {
       printf("Option home is not changed! (shit happens)\n\r");
 #endif
       return -1;
-    }   }
-#endif
-  else {
+    }
+  } else {
 #ifdef Console
     printf("There is no such option\n\r");
 #endif
@@ -341,9 +323,7 @@ int todo_history_meta() {
   else if (strcmp((const char*)sqlite3_column_text(stmt, 0), "4") == 0)
     svn = atoi((const char*)sqlite3_column_text(stmt, 1));
   if (git == 1 || hg == 1 || svn == 1) {
-#ifndef _WIN32
     putenv(home);
-#endif
     if (git == 1)
       sprintf(cmd, "cd %s;git log", syncdir); //NOLINT
     else if (hg == 1)
@@ -369,9 +349,7 @@ int todo_history_custom(char* db) {
 
 int todo_sync_meta(char** argv) {
   char* filename;
-#ifndef _WIN32
   char* home;
-#endif
   int git = 0, hg = 0, svn = 0, darcs = 0;
   int timeDB = 0;
   int i = 0;
@@ -382,11 +360,7 @@ int todo_sync_meta(char** argv) {
   const char* search = "|";
   char* syncdir;
   char* cmd = calloc(200, sizeof(char));
-#ifdef _WIN32
-  char* context = NULL;
-#else
   home = calloc(200, sizeof(char));
-#endif
   filename = calloc(200, sizeof(char));
   syncdir = calloc(200, sizeof(char));
   sprintf(queries[ind++], "SELECT option, text FROM OPTIONS"); //NOLINT
@@ -396,9 +370,7 @@ int todo_sync_meta(char** argv) {
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
     free (cmd);
-    #ifndef _WIN32
     free (home);
-    #endif
     free (filename);
     free (syncdir);
     if (todo_initdb() == 0) {
@@ -426,14 +398,10 @@ int todo_sync_meta(char** argv) {
     darcs = atoi((const char*)sqlite3_column_text(stmt, 1));
   else if (strcmp((const char*)sqlite3_column_text(stmt, 0), "15") == 0)
     sprintf(filename, "%s/%s", syncdir, sqlite3_column_text(stmt, 1)); //NOLINT
-#ifndef _WIN32
   else if (strcmp((const char*)sqlite3_column_text(stmt, 0), "20") == 0)
     sprintf(home, "HOME=%s", sqlite3_column_text(stmt, 1)); //NOLINT
-#endif
   if (git == 1 || hg == 1 || svn == 1 || darcs == 1) {
-#ifndef _WIN32
     putenv(home);
-#endif
     if (git == 1)
       sprintf(cmd, "cd %s;git pull", syncdir);          //NOLINT
     else if (hg == 1)
@@ -453,9 +421,7 @@ int todo_sync_meta(char** argv) {
     printf("There is no such file and it's failed to create it\n\r");
 #endif
     free (cmd);
-    #ifndef _WIN32
     free (home);
-    #endif
     free (filename);
     free (syncdir);
     return -1;
@@ -463,10 +429,8 @@ int todo_sync_meta(char** argv) {
   while (fgets(line, 150, f)) {
     if (i == 0) {
       timefile = atoi(line);
-#ifndef _WIN32
 #ifdef Console
       printf("Timefile: %s\n\r", ctime(&timefile));
-#endif
 #endif
       if (timeDB > (int)timefile) break;
       else if (timeDB == (int)timefile) {
@@ -475,9 +439,7 @@ int todo_sync_meta(char** argv) {
 #endif
         fclose (f);
         free (cmd);
-        #ifndef _WIN32
         free (home);
-        #endif
         free (filename);
         free (syncdir);
         return 0;
@@ -492,9 +454,7 @@ int todo_sync_meta(char** argv) {
 #endif
           fclose (f);
           free (cmd);
-          #ifndef _WIN32
           free (home);
-          #endif
           free (filename);
           free (syncdir);
           if (todo_initdb() == 0) {
@@ -508,13 +468,8 @@ int todo_sync_meta(char** argv) {
           return todo_sync_meta(argv);
         }
       } else {
-#ifdef _WIN32
-        token1 = strtok_s(line, search, &context);
-        token2 = strtok_s(NULL, search, &context);
-#else
         token1 = strtok(line, search);
         token2 = strtok(NULL, search);
-#endif
         if (token1[1] == '-') token1 += 3;
         rtrim(token2);
         sprintf(queries[ind++], "INSERT INTO TODO VALUES(%s,'%s', 0)", token1, token2); //NOLINT
@@ -544,9 +499,7 @@ int todo_sync_meta(char** argv) {
       , sqlite3_column_text(stmt, 1));
     fclose(f);
     if (git == 1 || hg == 1 || svn == 1 || darcs == 1) {
-#ifndef _WIN32
       putenv(home);
-#endif
       if (git == 1)
         sprintf(cmd, "cd %s;git commit -am \"TODO LIST UPDATE\";git push", syncdir);      //NOLINT
       else if (hg == 1)
@@ -567,9 +520,7 @@ int todo_sync_meta(char** argv) {
 #endif
   }
   free (cmd);
-  #ifndef _WIN32
   free (home);
-  #endif
   free(syncdir);
   free(filename);
   return 0;
@@ -710,7 +661,6 @@ char** todo_read_meta(int list, int parcount) {
   out = malloc(sizeof(char*) * 50);
   for (x = 0; x < 100; ++x)
     out[x] = malloc(sizeof(char) * 512);
-#ifndef _WIN32
   char* colorscheme;
   char* lineborder2;
   ///<Summary>
@@ -739,7 +689,6 @@ char** todo_read_meta(int list, int parcount) {
     else sprintf(colorscheme, "%c[%d;%d;%dm", 0x1B, 1, 37, 41); //NOLINT
     break;
   }
-#endif
   if (parcount > 0)
     sprintf(queries[ind++], "SELECT COALESCE(MAX(id),0) FROM TODO WHERE list = %d", list); //NOLINT
   else queries[ind++] = "SELECT COALESCE(MAX(id),0) from TODO";
@@ -799,35 +748,20 @@ char** todo_read_meta(int list, int parcount) {
     return todo_read_meta(list, parcount);
   }
   lineborder1 = calloc(512, sizeof(char));
-#ifndef _WIN32
   lineborder2 = calloc(512, sizeof(char));
-#endif
   spaces1 = calloc(200, sizeof(char));
   spaces2 = calloc(200, sizeof(char));
   for (i = 0; i < ((maxl2 + maxl1) + 5); ++i)
   if (i == 2 + maxl1) {
-#ifdef _WIN32
-    strcat(lineborder1, "+"); //NOLINT
-#else
     strcat(lineborder1, "╤"); //NOLINT
     strcat(lineborder2, "╧"); //NOLINT
-#endif
   } else {
-#ifdef _WIN32
-    strcat(lineborder1, "-"); //NOLINT
-#else
     strcat(lineborder1, "═"); //NOLINT
     strcat(lineborder2, "═"); //NOLINT
-#endif
   }
-#ifdef _WIN32
-  sprintf(out[0], "%s", lineborder1); //NOLINT
-  x = 2;
-#else
   sprintf(out[1], "%s", colorscheme); //NOLINT
   sprintf(out[0], "%s", lineborder1); //NOLINT
   x = 4;
-#endif
   while (sqlite3_step(stmt) == SQLITE_ROW) {
     maxi1 = maxl1 - strlen((const char*)sqlite3_column_text(stmt, 0));
     maxi2 = maxl2 - atoi((const char*)sqlite3_column_text(stmt, 2));
@@ -837,37 +771,22 @@ char** todo_read_meta(int list, int parcount) {
       strcat(spaces1, " "); //NOLINT
     for (i = 0; i < maxi2; ++i)
       strcat(spaces2, " "); //NOLINT
-#ifdef _WIN32
-    sprintf(out[x], "%s %s", //NOLINT
-      sqlite3_column_text(stmt, 0)
-      , spaces1);
-    sprintf(out[x + 1], "%s %s", //NOLINT
-      sqlite3_column_text(stmt, 1)
-      , spaces2);
-#else
     sprintf(out[x], " %s %s", //NOLINT
       sqlite3_column_text(stmt, 0)
       , spaces1);
     sprintf(out[x + 1], " %s %s" //NOLINT
       , sqlite3_column_text(stmt, 1)
       , spaces2);
-#endif
     x += 2;
   }
-#ifdef _WIN32
-  memcpy(out[1], &x, sizeof(int));    //NOLINT
-#else
   memcpy(out[3], &x, sizeof(int));    //NOLINT
   sprintf(out[2], "%s", colorscheme); //NOLINT
   sprintf(out[1], "%s", lineborder2); //NOLINT
-#endif
   free(lineborder1);
   free(spaces1);
   free(spaces2);
-#ifndef _WIN32
   free(lineborder2);
   free(colorscheme);
-#endif
   return out;
 }
 

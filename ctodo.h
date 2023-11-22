@@ -1,10 +1,6 @@
 #ifndef CTODO_H
 #define CTODO_H
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
 extern void todo_initdb();
 extern void todo_initdb_custom(char* db);
 

@@ -1,8 +1,4 @@
-﻿#ifdef _WIN32
-#include <Windows.h>
-#endif
-
-#include "ctodo.h"
+﻿#include "ctodo.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +8,7 @@ char* dest_help = NULL;
 char* db        = NULL;
 
 char* subete_version() {
-  return "  subete v0.0.5\n";
+  return "  subete v0.0.6\n";
 }
 
 char* subete_help() {
@@ -45,36 +41,20 @@ char* subete_help() {
         - svn - execute subversion synchronization 1/0 for enable/disable (default 0)\n\
         - darcs - execute darcs synchronization 1/0 for enable/disable (default 0)\n\
       - end - always end todo notes with additional word (default 0)\n\
-      - ending - word, using for end feature (default 'be a man')\n");
-#ifndef _WIN32
-    strcat(dest_help,                    // NOLINT
-"\
+      - ending - word, using for end feature (default 'БЛЯДЬ')\n\
       - home - file for home path (request for synchronization)\n\
       - color - ctodo color scheme for posix (default 'red')\n\
         - schemas: red, blink, green, pink, black\n");
-#endif
-    return &dest_help[0];
+  return &dest_help[0];
 }
 
 int ctodo_read_meta(int list, char** out) {
   int x, maxl;
-#ifdef _WIN32
-  memcpy(&maxl, out[1], sizeof(int));
-#else
   memcpy(&maxl, out[3], sizeof(int)); // NOLINT
-#endif
   if (out != NULL) {
-#ifdef _WIN32
-    printf("+%s+\n\r", out[0]);
-#else
     printf(" %s", out[2]);
     printf("╔%s╗", out[0]);
     printf("%c[%dm\n\r", 0x1B, 0);
-#endif
-#ifdef _WIN32
-    for (x = 2; x < maxl; x += 2) {
-      printf("| %s| %s|\n\r", out[x], out[x + 1]);
-#else
     for (x = 4; x < maxl; x += 2) {
       printf(" %s║", out[2]);
       printf("%c[%dm", 0x1B, 0);
@@ -84,15 +64,10 @@ int ctodo_read_meta(int list, char** out) {
       printf("%s", out[x + 1]);
       printf("%s║", out[2]);
       printf("%c[%dm\n", 0x1B, 0);
-#endif
     }
-#ifdef _WIN32
-    printf("+%s+\n\r", out[0]);
-#else
     printf(" %s", out[2]);
     printf("╚%s╝", out[1]);
     printf("%c[%dm\n\r", 0x1B, 0);
-#endif
     return 0;
   } else {
     return -1;
