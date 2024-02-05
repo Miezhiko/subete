@@ -303,7 +303,7 @@ int todo_history_meta(char* db) {
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
     free(cmd);
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -374,7 +374,7 @@ int todo_sync_meta(char** argv, char* db) {
     free (home);
     free (filename);
     free (syncdir);
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -458,7 +458,7 @@ int todo_sync_meta(char** argv, char* db) {
           free (home);
           free (filename);
           free (syncdir);
-          if (todo_initdb(db) == 0) {
+          if (todo_initdb_custom(db) == 0) {
 #ifdef Console
             printf("Done\n\r");
 #endif
@@ -698,7 +698,7 @@ char** todo_read_meta(int list, int parcount, char* db) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -718,7 +718,7 @@ char** todo_read_meta(int list, int parcount, char* db) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -738,7 +738,7 @@ char** todo_read_meta(int list, int parcount, char* db) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -817,7 +817,7 @@ int todo_write_meta(char** argv, int argc, int list, char* db) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -844,7 +844,7 @@ int todo_write_meta(char** argv, int argc, int list, char* db) {
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
     free (ending);
-    if (todo_initdb(db) == 0) {
+    if (todo_initdb_custom(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
