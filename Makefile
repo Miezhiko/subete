@@ -1,4 +1,5 @@
-CFLAGS=-lsqlite3 -Ofast
+CFLAGS=-Ofast
+CFLAGSEXE=-lsqlite3 ${CFLAGS}
 CSRC=subete.c
 CLIBS=ctodo.c
 LIBS=todo.o
@@ -13,7 +14,7 @@ all: subete
 rebuild: clean all
 
 subete: $(CSRC) $(LIBS)
-	$(CC) ${INCLUDES} -o subete $^ ${CFLAGS}
+	$(CC) ${INCLUDES} -o subete $^ ${CFLAGSEXE}
 
 $(LIBS): $(CLIBS)
 	$(CC) ${INCLUDES} -c -o $@ $^ $(CFLAGS)
