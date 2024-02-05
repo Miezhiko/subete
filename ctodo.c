@@ -27,7 +27,7 @@ char** queries  = NULL;
 sqlite3* handle = NULL;
 
 char* todo_version() {
-  return "  CTODO v0.0.5\n";
+  return "  CTODO v0.0.6\n";
 }
 
 char* todo_help() {
@@ -184,6 +184,7 @@ int todo_initdb() {
 }
 
 int todo_initdb_custom(char* db) {
+  if (db == NULL) return todo_initdb();
   if (prelude_custom(db) == -1) return -1;
   return todo_initdb_meta();
 }
@@ -291,7 +292,7 @@ int todo_show_custom(char** argv, int argc, char* db) {
   else return todo_show_meta(argv, argc);
 }
 
-int todo_history_meta() {
+int todo_history_meta(char* db) {
   char* syncdir;
   char* cmd = calloc(200, sizeof(char));
   int git = 0, hg = 0, svn = 0;
@@ -302,7 +303,7 @@ int todo_history_meta() {
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
     free(cmd);
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -310,7 +311,7 @@ int todo_history_meta() {
       shitHappended();
       return -1;
     }
-    return todo_history_meta();
+    return todo_history_meta(db);
   }
   syncdir = calloc(200, sizeof(char));
   while (sqlite3_step(stmt) == SQLITE_ROW)
@@ -339,15 +340,15 @@ int todo_history_meta() {
 
 int todo_history() {
   if (prelude() == -1) return -1;
-  else return todo_history_meta();
+  else return todo_history_meta(NULL);
 }
 
 int todo_history_custom(char* db) {
   if (prelude_custom(db) == -1) return -1;
-  else return todo_history_meta();
+  else return todo_history_meta(db);
 }
 
-int todo_sync_meta(char** argv) {
+int todo_sync_meta(char** argv, char* db) {
   char* filename;
   char* home;
   int git = 0, hg = 0, svn = 0, darcs = 0;
@@ -373,7 +374,7 @@ int todo_sync_meta(char** argv) {
     free (home);
     free (filename);
     free (syncdir);
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -381,7 +382,7 @@ int todo_sync_meta(char** argv) {
       shitHappended();
       return -1;
     }
-    return todo_sync_meta(argv);
+    return todo_sync_meta(argv, db);
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
   if (strcmp((const char*)sqlite3_column_text(stmt, 0), "0") == 0)
@@ -457,7 +458,7 @@ int todo_sync_meta(char** argv) {
           free (home);
           free (filename);
           free (syncdir);
-          if (todo_initdb() == 0) {
+          if (todo_initdb(db) == 0) {
 #ifdef Console
             printf("Done\n\r");
 #endif
@@ -465,7 +466,7 @@ int todo_sync_meta(char** argv) {
             shitHappended();
             return -1;
           }
-          return todo_sync_meta(argv);
+          return todo_sync_meta(argv, db);
         }
       } else {
         token1 = strtok(line, search);
@@ -528,12 +529,12 @@ int todo_sync_meta(char** argv) {
 
 int todo_sync(char** argv) {
   if (prelude() == -1) return -1;
-  return todo_sync_meta(argv);
+  return todo_sync_meta(argv, NULL);
 }
 
 int todo_sync_custom(char** argv, char* db) {
   if (prelude_custom(db) == -1) return -1;
-  return todo_sync_meta(argv);
+  return todo_sync_meta(argv, db);
 }
 
 void todo_edit_meta(char** argv, int argc) {
@@ -652,7 +653,7 @@ void todo_rm_custom(int argc, char** argv, char* db) {
   if (prelude_custom(db) != -1) todo_rm_meta(argc, argv);
 }
 
-char** todo_read_meta(int list, int parcount) {
+char** todo_read_meta(int list, int parcount, char* db) {
   char* lineborder1;
   char* spaces1;
   char* spaces2;
@@ -697,7 +698,7 @@ char** todo_read_meta(int list, int parcount) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -705,7 +706,7 @@ char** todo_read_meta(int list, int parcount) {
       shitHappended();
       return NULL;
     }
-    return todo_read_meta(list, parcount);
+    return todo_read_meta(list, parcount, db);
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
     maxl1 = strlen((const char*)sqlite3_column_text(stmt, 0));
@@ -717,7 +718,7 @@ char** todo_read_meta(int list, int parcount) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -725,7 +726,7 @@ char** todo_read_meta(int list, int parcount) {
       shitHappended();
       return NULL;
     }
-    return todo_read_meta(list, parcount);
+    return todo_read_meta(list, parcount, db);
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
     maxl2 = atoi((const char*)sqlite3_column_text(stmt, 0));
@@ -737,7 +738,7 @@ char** todo_read_meta(int list, int parcount) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -745,7 +746,7 @@ char** todo_read_meta(int list, int parcount) {
       shitHappended();
       return NULL;
     }
-    return todo_read_meta(list, parcount);
+    return todo_read_meta(list, parcount, db);
   }
   lineborder1 = calloc(512, sizeof(char));
   lineborder2 = calloc(512, sizeof(char));
@@ -792,15 +793,15 @@ char** todo_read_meta(int list, int parcount) {
 
 char** todo_read(int list, int parcount) {
   if (prelude() == -1) return NULL;
-  return todo_read_meta(list, parcount);
+  return todo_read_meta(list, parcount, NULL);
 }
 
 char** todo_read_custom(int list, int parcount, char* db) {
   if (prelude_custom(db) == -1) return NULL;
-  return todo_read_meta(list, parcount);
+  return todo_read_meta(list, parcount, db);
 }
 
-int todo_write_meta(char** argv, int argc, int list) {
+int todo_write_meta(char** argv, int argc, int list, char* db) {
   char first = 0;
   int last = 0;
   int argi;
@@ -816,7 +817,7 @@ int todo_write_meta(char** argv, int argc, int list) {
 #ifdef Console
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -824,7 +825,7 @@ int todo_write_meta(char** argv, int argc, int list) {
       shitHappended();
       return -1;
     }
-    return todo_write_meta(argv, argc, list);
+    return todo_write_meta(argv, argc, list, db);
   }
   char* ending = calloc(200, sizeof(char));
   while (sqlite3_step(stmt) == SQLITE_ROW)
@@ -843,7 +844,7 @@ int todo_write_meta(char** argv, int argc, int list) {
     printf("Reading DB data Failed, running re-init\n\r");
 #endif
     free (ending);
-    if (todo_initdb() == 0) {
+    if (todo_initdb(db) == 0) {
 #ifdef Console
       printf("Done\n\r");
 #endif
@@ -851,7 +852,7 @@ int todo_write_meta(char** argv, int argc, int list) {
       shitHappended();
       return -1;
     }
-    return todo_write_meta(argv, argc, list);
+    return todo_write_meta(argv, argc, list, db);
   }
   while (sqlite3_step(stmt) == SQLITE_ROW)
     last = atoi((const char*)sqlite3_column_text(stmt, 0));
@@ -902,10 +903,10 @@ int todo_write_meta(char** argv, int argc, int list) {
 
 int todo_write(char** argv, int argc, int list) {
   if (prelude() == -1) return -1;
-  return todo_write_meta(argv, argc, list);
+  return todo_write_meta(argv, argc, list, NULL);
 }
 
 int todo_write_custom(char** argv, int argc, int list, char* db) {
   if (prelude_custom(db) == -1) return -1;
-  return todo_write_meta(argv, argc, list);
+  return todo_write_meta(argv, argc, list, db);
 }
